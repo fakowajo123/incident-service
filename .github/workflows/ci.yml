@@ -49,16 +49,12 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push Docker image
-        run: |
-          REPO_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}
-          echo "Building image: $REPO_URI:${IMAGE_TAG}"
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+            ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
 
-          docker build -t $REPO_URI:${IMAGE_TAG} .
-          docker push $REPO_URI:${IMAGE_TAG}
-
-          # Also push 'latest' for convenience
-          docker tag $REPO_URI:${IMAGE_TAG} $REPO_URI:latest
-          docker push $REPO_URI:latest
-
-          echo "IMAGE_URI=$REPO_URI:${IMAGE_TAG}" >> $GITHUB_OUTPUT
 

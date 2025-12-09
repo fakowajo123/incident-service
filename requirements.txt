@@ -1,0 +1,9 @@
+# incident-service/requirements.txt
+fastapi[all]
+uvicorn
+pydantic
+httpx
+# Database dependencies
+sqlalchemy
+psycopg2-binary 
+python-dotenv

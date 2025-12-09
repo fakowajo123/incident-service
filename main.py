@@ -17,7 +17,7 @@ load_dotenv() # Load env vars for local testing
 app = FastAPI(title="Incident Core Service (Postgres)")
 
 # --- CORS Configuration ---
-origins = ["http://127.0.0.1:5173", "http://localhost:5173"]
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://k8s-incident-incident-a59589fc56-1030006196.us-east-1.elb.amazonaws.com").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -27,7 +27,7 @@ app.add_middleware(
 )
 
 # --- Notification Configuration ---
-NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL", "http://127.0.0.1:8001/notify")
+NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL", "http://notification-service:8001/notify")
 
 
 # Dependency: Get Database Session

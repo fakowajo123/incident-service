@@ -1,0 +1,64 @@
+name: CI - Incident Service
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+      IMAGE_TAG: dev-${{ github.sha }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Optional – only if you have Python tests / requirements.txt
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies (if any)
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run tests (placeholder)
+        run: |
+          echo "No tests configured yet"
+          # pytest tests/ || true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        run: |
+          REPO_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}
+          echo "Building image: $REPO_URI:${IMAGE_TAG}"
+
+          docker build -t $REPO_URI:${IMAGE_TAG} .
+          docker push $REPO_URI:${IMAGE_TAG}
+
+          # Also push 'latest' for convenience
+          docker tag $REPO_URI:${IMAGE_TAG} $REPO_URI:latest
+          docker push $REPO_URI:latest
+
+          echo "IMAGE_URI=$REPO_URI:${IMAGE_TAG}" >> $GITHUB_OUTPUT
+

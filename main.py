@@ -20,7 +20,7 @@ app = FastAPI(title="Incident Core Service (Postgres)")
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://k8s-incident-incident-a59589fc56-1030006196.us-east-1.elb.amazonaws.com").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
